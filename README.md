@@ -1,4 +1,4 @@
-# woodpecker 
+# woodpecker 🪶
 
 A down-to-the-metal cryptography challenge designed by Radical Semiconductor.
 
@@ -8,9 +8,7 @@ A down-to-the-metal cryptography challenge designed by Radical Semiconductor.
 >
 > One morning, a coworker stumbles into your office, clearly exhausted.
 >
-> With a deadline looming in hours, they've been tasked with writing signature routines for a bizarre, archaic crypto coprocessor.
->
-> Your desk is still covered in half-disassembled devices and hasty notes from your work, but for better or worse you agree to help. 
+> With a deadline looming in hours, they've been tasked with writing signature routines for a bizarre, archaic crypto coprocessor. Your desk is still covered in half-disassembled devices and hasty notes from your work, but for better or worse you agree to help. 
 >
 >The documentation is surprisingly short though--hopefully this won't be too bad. 
 
