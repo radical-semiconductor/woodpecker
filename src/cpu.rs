@@ -3,41 +3,44 @@ use bitvec::prelude::*;
 const DEFAULT_MEM_SIZE: usize = 1024;
 
 #[derive(Debug, Copy, Clone)]
-enum Command {
+pub enum Command {
     Inc,
     Inv,
     Load,
     Cdec
 }
 
-struct Woodpecker {
+pub struct Processor {
     memory: BitVec,
+    mem_usage: usize,
     addr: usize,
     store: bool,
 }
 
-impl Woodpecker {
-    fn new() -> Woodpecker {
-        Woodpecker {
+impl Processor {
+    pub fn new() -> Processor {
+        Processor {
             memory: bitvec![0; DEFAULT_MEM_SIZE],
+            mem_usage: 1,
             addr: 0,
             store: false,
         }
     }
 
-    fn reset(&mut self) {
-        self.memory = bitvec![0; DEFAULT_MEM_SIZE];
-        self.addr = 0;
-        self.store = false;
-    }
-
     fn increment_addr(&mut self) {
-        // increment the address and expand memory if needed
+        // increment the address
         self.addr += 1;
 
+        // expand memory if necessary by 2x
         let mem_len = self.memory.len();
         if self.addr > mem_len {
             self.memory.resize(mem_len * 2, false);
+        }
+
+        // if we've never been this high, update memory size
+        let mem_usage = self.addr + 1;
+        if mem_usage > self.mem_usage {
+            self.mem_usage = mem_usage;
         }
     }
 
@@ -63,7 +66,7 @@ impl Woodpecker {
         }
     }
 
-    fn exec(&mut self, cmd: &Command) {
+    pub fn exec(&mut self, cmd: &Command) {
         match cmd {
             Command::Inc => self.increment_addr(),
             Command::Inv => self.invert_bit(),
@@ -72,12 +75,8 @@ impl Woodpecker {
         }
     }
 
-    pub fn run(&mut self, program: &[Command]) {
-        self.reset();
-
-        for cmd in program {
-            self.exec(cmd);
-        }
+    pub fn dump(&mut self) -> &BitSlice {
+        &self.memory[..self.mem_usage]
     }
 }
 
@@ -86,21 +85,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_reset_works() {
-        let mut cpu = Woodpecker::new();
-        cpu.memory.set(0, true);
-        cpu.addr = 5;
-        cpu.store = true;
-
-        cpu.reset();
-        assert_eq!(cpu.memory[0], false);
-        assert_eq!(cpu.addr, 0);
-        assert_eq!(cpu.store, false);
-    }
-
-    #[test]
     fn test_inc_works() {
-        let mut cpu = Woodpecker::new();
+        let mut cpu = Processor::new();
 
         cpu.exec(&Command::Inc);
         assert_eq!(cpu.addr, 1);
@@ -108,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_inc_expands_memory() {
-        let mut cpu = Woodpecker::new();
+        let mut cpu = Processor::new();
 
         for _ in 0..(DEFAULT_MEM_SIZE * 2) {
             cpu.exec(&Command::Inc);
@@ -119,7 +105,7 @@ mod tests {
 
     #[test]
     fn test_inv_works() {
-        let mut cpu = Woodpecker::new();
+        let mut cpu = Processor::new();
 
         cpu.exec(&Command::Inv);
         assert_eq!(cpu.memory[0], true);
@@ -127,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_load_works() {
-        let mut cpu = Woodpecker::new();
+        let mut cpu = Processor::new();
         cpu.memory.set(0, true);
 
         cpu.exec(&Command::Load);
@@ -136,7 +122,7 @@ mod tests {
 
     #[test]
     fn test_cdec_works() { 
-        let mut cpu = Woodpecker::new();
+        let mut cpu = Processor::new();
         cpu.store = true;
         cpu.addr = 1;
 
@@ -146,26 +132,10 @@ mod tests {
 
     #[test]
     fn test_cdec_skips_when_unset() {
-        let mut cpu = Woodpecker::new();
+        let mut cpu = Processor::new();
         cpu.addr = 1;
 
         cpu.exec(&Command::Cdec);
         assert_eq!(cpu.addr, 1);
-    }
-
-    #[test]
-    fn test_full_program_runs() {
-        let mut cpu = Woodpecker::new();
-        let program = [
-            Command::Inc,
-            Command::Inv,
-            Command::Load,
-            Command::Cdec,
-            Command::Inv
-        ];
-
-        cpu.run(&program);
-        assert_eq!(cpu.memory[0], true);
-        assert_eq!(cpu.memory[1], true);
     }
 }

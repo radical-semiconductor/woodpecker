@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 bitvec = "1.0.1"
+clap = { version = "4.0.18", features = ["derive"] }
