@@ -1,6 +1,8 @@
 use bitvec::prelude::*; 
+use crate::error::{CpuError, CpuErrorKind};
 
 const DEFAULT_MEM_SIZE: usize = 1024;
+
 
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
@@ -15,6 +17,7 @@ pub struct Processor {
     mem_usage: usize,
     addr: usize,
     store: bool,
+    step: usize,
 }
 
 impl Processor {
@@ -24,12 +27,22 @@ impl Processor {
             mem_usage: 1,
             addr: 0,
             store: false,
+            step: 0,
         }
     }
 
-    fn increment_addr(&mut self) {
-        // increment the address
-        self.addr += 1;
+    fn increment_addr(&mut self) -> std::result::Result<(), CpuError> {
+        // try to increment the address
+        if let Some(addr)= self.addr.checked_add(1) {
+            self.addr = addr
+        } else {
+            let err = CpuError {
+                kind: CpuErrorKind::OutOfMemory,
+                step: self.step,
+            };
+
+            return Err(err);
+        }
 
         // expand memory if necessary by 2x
         let mem_len = self.memory.len();
@@ -42,6 +55,8 @@ impl Processor {
         if mem_usage > self.mem_usage {
             self.mem_usage = mem_usage;
         }
+
+        Ok(())
     }
 
     fn invert_bit(&mut self) {
@@ -55,24 +70,35 @@ impl Processor {
         self.store = self.memory[self.addr]
     }
 
-    fn decrement_addr_if_store_set(&mut self) {
+    fn decrement_addr_if_store_set(&mut self) -> std::result::Result<(), CpuError> {
         // conditionally decrement if store is set
         if self.store {
             if let Some(addr) = self.addr.checked_sub(1) {
                 self.addr = addr;
             } else {
-                panic!("attempted to Cdec past 0")
+                let err = CpuError {
+                    kind: CpuErrorKind::NegativeAddr,
+                    step: self.step,
+                };
+
+                return Err(err);
             }
         }
+
+        Ok(())
     }
 
-    pub fn exec(&mut self, cmd: &Command) {
+    pub fn exec(&mut self, cmd: &Command) -> std::result::Result<(), CpuError> {
+        self.step += 1;
+
         match cmd {
-            Command::Inc => self.increment_addr(),
+            Command::Inc => self.increment_addr()?,
             Command::Inv => self.invert_bit(),
             Command::Load => self.load_bit_to_store(),
-            Command::Cdec => self.decrement_addr_if_store_set(),
+            Command::Cdec => self.decrement_addr_if_store_set()?,
         }
+
+        Ok(())
     }
 
     pub fn dump(&mut self) -> &BitSlice {
