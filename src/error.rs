@@ -56,22 +56,16 @@ impl Display for ParseError{
 }
 
 #[derive(Debug, Clone)]
-pub enum CpuErrorKind {
+pub enum CpuError {
     NegativeAddr,
     OutOfMemory,
-}
-
-#[derive(Debug, Clone)]
-pub struct CpuError {
-    pub kind: CpuErrorKind,
-    pub step: usize,
 }
 
 impl Display for CpuError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            NegativeAddr => write!(f, "attempted to move below address 0 at step {}", self.step),
-            OutOfMemory => write!(f, "attempted to move to location higher than ADDR can store at step {}", self.step),
+            CpuError::NegativeAddr => write!(f, "attempted to move below address 0"),
+            CpuError::OutOfMemory => write!(f, "attempted to move beyond memory end"),
         }
     }
 }

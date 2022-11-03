@@ -7,17 +7,18 @@ use std::io::{self, prelude::*, BufReader};
 
 use cpu::{Command, Cpu};
 use error::{ExecutionError, ParseError};
-use ui::show_cpu;
+use ui::interact_cpu;
 
 pub type Result<T> = std::result::Result<T, ExecutionError>;
 
-const BYTES_PER_LINE: usize = 8;
-
-
 pub fn run(name: &str) -> Result<()> {
-    let (cpu, commands) = load_cpu_and_commands(name)?;
+    let (mem_size, commands) = parse_program(name)?;
+    let mut cpu = Cpu::new(mem_size, &commands);
+    let run_result = cpu.run();
 
-    show_cpu().unwrap();
+    println!("{:?}", run_result);
+
+    interact_cpu(&mut cpu, run_result)?;
 
     Ok(())
 }
@@ -26,20 +27,19 @@ pub fn test(challenge: &u8, name: &str) -> Result<()> {
     Ok(())
 }
 
-fn load_cpu_and_commands(name: &str) -> Result<(Cpu, Vec<Command>)>{
+fn parse_program(name: &str) -> Result<(usize, Vec<Command>)>{
     let file = File::open(name)?;
     let reader = BufReader::new(file);
     let lines: Vec<String> = reader.lines().collect::<io::Result<_>>()?;
 
     let mem_size = parse_mem_size(&lines[0])?;
-    let mut cpu = Cpu::new(mem_size);
 
     let commands: Result<Vec<Command>> = lines[1..].iter()
         .enumerate()
         .map(|(num, l)| parse_command(l, num))
         .collect();
 
-    Ok((cpu, commands?))
+    Ok((mem_size, commands?))
 }
 
 fn parse_mem_size(line: &str) -> Result<usize> {
