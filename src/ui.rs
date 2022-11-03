@@ -1,81 +1,18 @@
-use crossterm::{
-    event::{read, Event, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
-use std::io;
 use tui::{
-    backend::{Backend, CrosstermBackend},
+    backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, Borders, Paragraph},
-    Frame, Terminal,
+    Frame,
 };
 
-use crate::{Result, cpu::Command};
+use crate::{
+    cpu::{Command, Cpu},
+    error::CpuError,
+};
 
-use crate::{cpu::Cpu, error::CpuError};
-
-pub fn interact_cpu(cpu: &mut Cpu, run_result: std::result::Result<(), CpuError>) -> Result<()> {
-    // mark the final step of the CPU to not go past
-    let final_step = cpu.step;
-
-    // set up terminal
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen)?;
-    enable_raw_mode()?;
-
-    // fetch backend
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
-
-    // perform game loop
-    loop {
-        terminal.draw(|f| {
-            let chunks = Layout::default()
-                .direction(Direction::Vertical)
-                .margin(1)
-                .constraints(
-                    [
-                        Constraint::Length(3),
-                        Constraint::Length(3),
-                        Constraint::Length(3),
-                        Constraint::Percentage(100),
-                    ]
-                    .as_ref(),
-                )
-                .split(f.size());
-
-            draw_title(f, chunks[0]);
-            draw_status(f, chunks[1], cpu, final_step, &run_result);
-            draw_registers(f, chunks[2], cpu);
-
-            let memory_block = Block::default().title("Memory").borders(Borders::ALL);
-            f.render_widget(memory_block, chunks[3]);
-        })?;
-
-        let event = read()?;
-
-        if let Event::Key(key_event) = event {
-            match key_event.code {
-                KeyCode::Char('q') => break,
-                KeyCode::Left => cpu.backward().unwrap(),
-                KeyCode::Right => cpu.forward().unwrap(),
-                _ => (),
-            }
-        }
-    }
-
-    // restore terminal
-    execute!(terminal.backend_mut(), LeaveAlternateScreen,)?;
-    terminal.show_cursor()?;
-    disable_raw_mode()?;
-
-    Ok(())
-}
-
-fn draw_title<B: Backend>(f: &mut Frame<B>, size: Rect) {
+pub fn draw_title<B: Backend>(f: &mut Frame<B>, size: Rect) {
     let status_text = vec![
         Spans::from(vec![
             Span::styled("Arbor Microtech", Style::default().fg(Color::White)),
@@ -100,7 +37,7 @@ fn draw_title<B: Backend>(f: &mut Frame<B>, size: Rect) {
     f.render_widget(status_widget, size);
 }
 
-fn draw_status<B: Backend>(
+pub fn draw_status<B: Backend>(
     f: &mut Frame<B>,
     size: Rect,
     cpu: &Cpu,
@@ -165,8 +102,14 @@ fn draw_cmd<B: Backend>(f: &mut Frame<B>, size: Rect, cmd: Option<Command>) {
     f.render_widget(cmd_widget, size);
 }
 
-fn draw_err<B: Backend>(f: &mut Frame<B>, size: Rect, step: usize, final_step: usize, run_result: &std::result::Result<(), CpuError>) {
-    let (is_error, error_str) = if step == final_step{
+fn draw_err<B: Backend>(
+    f: &mut Frame<B>,
+    size: Rect,
+    step: usize,
+    final_step: usize,
+    run_result: &std::result::Result<(), CpuError>,
+) {
+    let (is_error, error_str) = if step == final_step {
         match run_result {
             Ok(_) => (false, String::from("[none]")),
             Err(CpuError::OutOfMemory) => (true, String::from("MEM")),
@@ -176,8 +119,11 @@ fn draw_err<B: Backend>(f: &mut Frame<B>, size: Rect, step: usize, final_step: u
         (false, String::from("[none]"))
     };
 
-    let mut err_style = Style::default()
-        .fg(if is_error { Color::LightRed } else { Color::Gray });
+    let mut err_style = Style::default().fg(if is_error {
+        Color::LightRed
+    } else {
+        Color::Gray
+    });
 
     if is_error {
         err_style = err_style.add_modifier(Modifier::BOLD);
@@ -192,7 +138,7 @@ fn draw_err<B: Backend>(f: &mut Frame<B>, size: Rect, step: usize, final_step: u
     f.render_widget(err_widget, size);
 }
 
-fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
+pub fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
@@ -207,7 +153,10 @@ fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
         .block(addr_block)
         .alignment(Alignment::Center);
 
-    let store_text = Span::styled(cpu.store.to_string(), Style::default().fg(Color::LightYellow));
+    let store_text = Span::styled(
+        cpu.store.to_string(),
+        Style::default().fg(Color::LightYellow),
+    );
     let store_block = Block::default().title("Store").borders(Borders::ALL);
     let store_widget = Paragraph::new(store_text)
         .block(store_block)
@@ -217,10 +166,7 @@ fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
     f.render_widget(store_widget, chunks[1]);
 }
 
-/* fn draw_data<B: Backend>(f: &mut Frame<B>, size: u16) {
-    let size = f.size();
-    let block = Block::default()
-        .title("Block")
-        .borders(Borders::ALL);
-    f.render_widget(block, size);
-} */
+pub fn draw_memory<B: Backend>(f: &mut Frame<B>, size: Rect) {
+    let memory_block = Block::default().title("Memory").borders(Borders::ALL);
+    f.render_widget(memory_block, size);
+}
