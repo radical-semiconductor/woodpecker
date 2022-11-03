@@ -43,10 +43,10 @@ const BYTES_PER_LINE: usize = 4;
 pub fn draw_status<B: Backend>(
     f: &mut Frame<B>,
     size: Rect,
+    cpu: &Cpu,
+    run_result: &std::result::Result<(), CpuError>,
     step: usize,
     final_step: usize,
-    cmd: Option<Command>,
-    run_result: &std::result::Result<(), CpuError>,
 ) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -61,7 +61,10 @@ pub fn draw_status<B: Backend>(
         .split(size);
 
     draw_step(f, chunks[0], step, final_step);
-    draw_cmd(f, chunks[1], cmd);
+    draw_cmd(f, chunks[1], match step {
+        0 => None,
+        step => Some(cpu.commands[step - 1]),
+    });
     draw_err(f, chunks[2], step, final_step, run_result);
 }
 
@@ -177,7 +180,7 @@ pub fn draw_memory<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
         .map(|mem_line| {
             Spans::from(Span::styled(
                 mem_line,
-                Style::default().fg(Color::LightYellow),
+                Style::default().fg(Color::Gray),
             ))
         })
         .collect::<Vec<Spans>>();
@@ -220,7 +223,7 @@ fn get_memory_strs(mem: &BitVec) -> Vec<String> {
                 chunk
             };
 
-            format!("[ADDR 0x{:012x}] ", addr) + &full_chunk.join(" ")
+            format!("[ADDR 0x{:08x}] ", addr) + &full_chunk.join(" ")
         })
         .collect::<Vec<String>>()
 }

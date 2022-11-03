@@ -65,7 +65,14 @@ impl<'a> CpuDebugger<'a> {
                     .split(f.size());
 
                 draw_title(f, chunks[0]);
-                draw_status(f, chunks[1], self.step, self.final_step, self.cpu.get_command(), &self.run_result);
+                draw_status(
+                    f,
+                    chunks[1],
+                    self.cpu,
+                    &self.run_result,
+                    self.step,
+                    self.final_step,
+                );
                 draw_registers(f, chunks[2], self.cpu);
                 draw_memory(f, chunks[3], self.cpu);
             })?;

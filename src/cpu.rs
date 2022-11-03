@@ -29,6 +29,7 @@ pub struct Cpu {
     pub store: bool,
     pub step: usize,
     pub commands: Vec<Command>,
+    store_stack: Vec<bool>,
 }
 
 impl Cpu {
@@ -39,6 +40,7 @@ impl Cpu {
             store: false,
             step: 0,
             commands: Vec::from(commands),
+            store_stack: Vec::new(),
         }
     }
 
@@ -52,12 +54,11 @@ impl Cpu {
 
     pub fn forward(&mut self) -> Result<(), CpuError> {
         if self.step < self.commands.len() {
-            match self.get_command() {
-                Some(Command::Inc) => self.increment_addr()?,
-                Some(Command::Inv) => self.invert_bit(),
-                Some(Command::Load) => self.load_bit_to_store(),
-                Some(Command::Cdec) => self.decrement_addr_if_store_set()?,
-                None => (),
+            match self.commands[self.step] {
+                Command::Inc => self.increment_addr()?,
+                Command::Inv => self.invert_bit(),
+                Command::Load => self.load_bit_to_store(),
+                Command::Cdec => self.decrement_addr_if_store_set()?,
             }
 
             self.step += 1;
@@ -70,12 +71,11 @@ impl Cpu {
         if self.step > 0 {
             self.step -= 1;
 
-            match self.get_command() {
-                Some(Command::Inc) => self.decrement_addr()?,
-                Some(Command::Inv) => self.invert_bit(),
-                Some(Command::Load) => self.unload_bit_from_store(),
-                Some(Command::Cdec) => self.increment_addr_if_store_set()?,
-                None => (),
+            match self.commands[self.step] {
+                Command::Inc => self.decrement_addr()?,
+                Command::Inv => self.invert_bit(),
+                Command::Load => self.unload_bit_from_store(),
+                Command::Cdec => self.increment_addr_if_store_set()?,
             }
         }
 
@@ -134,14 +134,11 @@ impl Cpu {
     }
 
     fn load_bit_to_store(&mut self) {
-        // TODO: FIX
-        // load a bit into the store
+        self.store_stack.push(self.store);
         self.store = self.memory[self.addr]
     }
 
     fn unload_bit_from_store(&mut self) {
-        // TODO: FIX
-        // load a bit into the store
-        self.store = self.memory[self.addr]
+        self.store = self.store_stack.pop().unwrap();
     }
 }
