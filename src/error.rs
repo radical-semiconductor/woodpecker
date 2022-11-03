@@ -37,14 +37,21 @@ impl From<CpuError> for ExecutionError {
 }
 
 #[derive(Debug, Clone)]
-pub struct ParseError {
-    pub cmd: String,
-    pub line: usize,
+pub enum ParseError {
+    BitCountParseError,
+    CommandParseError {
+        cmd: String,
+        line: usize
+    }
 }
 
-impl Display for ParseError {
+
+impl Display for ParseError{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid command '{}' at line {}", self.cmd, self.line)
+        match self {
+            Self::BitCountParseError => write!(f, "invalid bit count specification"),
+            Self::CommandParseError { cmd, line } => write!(f, "invalid command '{}' at line {}", cmd, line)
+        }
     }
 }
 

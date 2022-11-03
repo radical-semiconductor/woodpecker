@@ -3,8 +3,7 @@ mod error;
 
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
-use bitvec::prelude::*;
-use cpu::{Command, Processor};
+use cpu::{Command, Cpu};
 use error::{ExecutionError, ParseError};
 
 pub type Result<T> = std::result::Result<T, ExecutionError>;
@@ -13,30 +12,7 @@ const BYTES_PER_LINE: usize = 8;
 
 
 pub fn run(name: &str) -> Result<()> {
-    let mut cpu = Processor::new();
-    let file = File::open(name)?;
-    let reader = BufReader::new(file);
-
-    for (line_num, line) in reader.lines().map(|l| l.unwrap()).enumerate() {
-        let cmd = match line.trim() {
-            "INC" => Command::Inc,
-            "INV" => Command::Inv,
-            "LOAD" => Command::Load,
-            "CDEC" => Command::Cdec,
-            cmd_str => {
-                let err = ParseError {
-                    cmd: cmd_str.to_owned(),
-                    line: line_num
-                };
-                return Err(err.into())
-            }
-        };
-
-        cpu.exec(&cmd)?;
-    }
-
-    let mem = cpu.dump();
-    dump_memory(mem);
+    let (cpu, commands) = load_cpu_and_commands(name)?;
 
     Ok(())
 }
@@ -45,8 +21,46 @@ pub fn test(challenge: &u8, name: &str) -> Result<()> {
     Ok(())
 }
 
+fn load_cpu_and_commands(name: &str) -> Result<(Cpu, Vec<Command>)>{
+    let file = File::open(name)?;
+    let reader = BufReader::new(file);
+    let lines: Vec<String> = reader.lines().collect::<std::result::Result<_, _>>()?;
 
-fn dump_memory(mem: &BitSlice) {
+    let mem_size = parse_mem_size(&lines[0])?;
+    let mut cpu = Cpu::new(mem_size);
+
+    let commands: Result<Vec<Command>> = lines[1..].iter()
+        .enumerate()
+        .map(|(num, l)| parse_command(l, num))
+        .collect();
+
+    Ok((cpu, commands?))
+}
+
+fn parse_mem_size(line: &str) -> Result<usize> {
+    let mem_size_str = line.split(":").next().ok_or(ParseError::BitCountParseError)?;
+    let mem_size = mem_size_str.parse().map_err(|_| ParseError::BitCountParseError)?;
+
+    Ok(mem_size)
+}
+
+fn parse_command(line: &str, line_num: usize) -> Result<Command> {
+    match line.trim() {
+        "INC" => Ok(Command::Inc),
+        "INV" => Ok(Command::Inv),
+        "LOAD" => Ok(Command::Load),
+        "CDEC" => Ok(Command::Cdec),
+        cmd_str => {
+            let err = ParseError::CommandParseError {
+                cmd: cmd_str.to_owned(),
+                line: line_num,
+            };
+            Err(err.into())
+        }   
+    }
+}
+
+/* fn dump_memory(mem: &BitSlice) {
     // turn the bytes into Strings
     let mut byte_strs: Vec<String> = mem.chunks(8)
         .map(|c| c.iter().map(|b| if *b { '1' } else { '0' }).collect())
@@ -79,4 +93,4 @@ fn dump_memory(mem: &BitSlice) {
         let line = format!("[ADDR 0x{:012x}] ", addr) + &full_chunk.join(" "); 
         println!("{}", line);
     }
-}
+} */
