@@ -13,7 +13,7 @@ use tui::{
     Frame, Terminal,
 };
 
-use crate::Result;
+use crate::{Result, cpu::Command};
 
 use crate::{cpu::Cpu, error::CpuError};
 
@@ -119,9 +119,15 @@ fn draw_status<B: Backend>(
         )
         .split(size);
 
+    draw_step(f, chunks[0], cpu.step, final_step);
+    draw_cmd(f, chunks[1], cpu.get_command());
+    draw_err(f, chunks[2], cpu.step, final_step, run_result);
+}
+
+fn draw_step<B: Backend>(f: &mut Frame<B>, size: Rect, step: usize, final_step: usize) {
     let step_text = Spans::from(vec![
         Span::styled(
-            format!(" {}", cpu.step),
+            format!(" {}", step),
             Style::default()
                 .fg(Color::LightGreen)
                 .add_modifier(Modifier::BOLD),
@@ -136,7 +142,11 @@ fn draw_status<B: Backend>(
         .block(step_block)
         .alignment(Alignment::Center);
 
-    let cmd_str = match cpu.get_command() {
+    f.render_widget(step_widget, size);
+}
+
+fn draw_cmd<B: Backend>(f: &mut Frame<B>, size: Rect, cmd: Option<Command>) {
+    let cmd_str = match cmd {
         Some(cmd) => cmd.to_string(),
         None => String::from("<INIT>"),
     };
@@ -152,7 +162,11 @@ fn draw_status<B: Backend>(
         .block(cmd_block)
         .alignment(Alignment::Center);
 
-    let (is_error, error_str) = if cpu.step == final_step {
+    f.render_widget(cmd_widget, size);
+}
+
+fn draw_err<B: Backend>(f: &mut Frame<B>, size: Rect, step: usize, final_step: usize, run_result: &std::result::Result<(), CpuError>) {
+    let (is_error, error_str) = if step == final_step{
         match run_result {
             Ok(_) => (false, String::from("[none]")),
             Err(CpuError::OutOfMemory) => (true, String::from("MEM")),
@@ -175,9 +189,7 @@ fn draw_status<B: Backend>(
         .block(err_block)
         .alignment(Alignment::Center);
 
-    f.render_widget(step_widget, chunks[0]);
-    f.render_widget(cmd_widget, chunks[1]);
-    f.render_widget(err_widget, chunks[2]);
+    f.render_widget(err_widget, size);
 }
 
 fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
