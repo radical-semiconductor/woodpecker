@@ -52,8 +52,6 @@ impl Cpu {
 
     pub fn forward(&mut self) -> Result<(), CpuError> {
         if self.step < self.commands.len() {
-            self.step += 1;
-
             match self.get_command() {
                 Some(Command::Inc) => self.increment_addr()?,
                 Some(Command::Inv) => self.invert_bit(),
@@ -61,6 +59,8 @@ impl Cpu {
                 Some(Command::Cdec) => self.decrement_addr_if_store_set()?,
                 None => (),
             }
+
+            self.step += 1;
         }
 
         Ok(())
@@ -68,6 +68,8 @@ impl Cpu {
 
     pub fn backward(&mut self) -> Result<(), CpuError> {
         if self.step > 0 {
+            self.step -= 1;
+
             match self.get_command() {
                 Some(Command::Inc) => self.decrement_addr()?,
                 Some(Command::Inv) => self.invert_bit(),
@@ -75,8 +77,6 @@ impl Cpu {
                 Some(Command::Cdec) => self.increment_addr_if_store_set()?,
                 None => (),
             }
-
-            self.step -= 1;
         }
 
         Ok(())

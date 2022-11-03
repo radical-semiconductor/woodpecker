@@ -43,8 +43,9 @@ const BYTES_PER_LINE: usize = 4;
 pub fn draw_status<B: Backend>(
     f: &mut Frame<B>,
     size: Rect,
-    cpu: &Cpu,
+    step: usize,
     final_step: usize,
+    cmd: Option<Command>,
     run_result: &std::result::Result<(), CpuError>,
 ) {
     let chunks = Layout::default()
@@ -59,9 +60,9 @@ pub fn draw_status<B: Backend>(
         )
         .split(size);
 
-    draw_step(f, chunks[0], cpu.step, final_step);
-    draw_cmd(f, chunks[1], cpu.get_command());
-    draw_err(f, chunks[2], cpu.step, final_step, run_result);
+    draw_step(f, chunks[0], step, final_step);
+    draw_cmd(f, chunks[1], cmd);
+    draw_err(f, chunks[2], step, final_step, run_result);
 }
 
 fn draw_step<B: Backend>(f: &mut Frame<B>, size: Rect, step: usize, final_step: usize) {
