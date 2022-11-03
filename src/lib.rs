@@ -3,7 +3,7 @@ mod error;
 mod ui;
 
 use std::fs::File;
-use std::io::{prelude::*, BufReader};
+use std::io::{self, prelude::*, BufReader};
 
 use cpu::{Command, Cpu};
 use error::{ExecutionError, ParseError};
@@ -29,7 +29,7 @@ pub fn test(challenge: &u8, name: &str) -> Result<()> {
 fn load_cpu_and_commands(name: &str) -> Result<(Cpu, Vec<Command>)>{
     let file = File::open(name)?;
     let reader = BufReader::new(file);
-    let lines: Vec<String> = reader.lines().collect::<std::result::Result<_, _>>()?;
+    let lines: Vec<String> = reader.lines().collect::<io::Result<_>>()?;
 
     let mem_size = parse_mem_size(&lines[0])?;
     let mut cpu = Cpu::new(mem_size);
@@ -43,8 +43,14 @@ fn load_cpu_and_commands(name: &str) -> Result<(Cpu, Vec<Command>)>{
 }
 
 fn parse_mem_size(line: &str) -> Result<usize> {
-    let mem_size_str = line.split(":").nth(1).ok_or(ParseError::BitCountParseError)?.trim();
-    let mem_size = mem_size_str.parse().map_err(|_| ParseError::BitCountParseError)?;
+    let mem_size_str = line.split(":")
+        .nth(1)
+        .ok_or(ParseError::BitCountParseError)?
+        .trim();
+
+    let mem_size = mem_size_str.parse()
+        .map_err(|_| ParseError::BitCountParseError)?;
+
     Ok(mem_size)
 }
 
