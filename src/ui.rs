@@ -1,3 +1,4 @@
+use bitvec::vec::BitVec;
 use tui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -36,6 +37,8 @@ pub fn draw_title<B: Backend>(f: &mut Frame<B>, size: Rect) {
 
     f.render_widget(status_widget, size);
 }
+
+const BYTES_PER_LINE: usize = 4;
 
 pub fn draw_status<B: Backend>(
     f: &mut Frame<B>,
@@ -166,7 +169,57 @@ pub fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
     f.render_widget(store_widget, chunks[1]);
 }
 
-pub fn draw_memory<B: Backend>(f: &mut Frame<B>, size: Rect) {
+pub fn draw_memory<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
+    let memory_strs = get_memory_strs(&cpu.memory);
+    let memory_text = memory_strs
+        .iter()
+        .map(|mem_line| {
+            Spans::from(Span::styled(
+                mem_line,
+                Style::default().fg(Color::LightYellow),
+            ))
+        })
+        .collect::<Vec<Spans>>();
     let memory_block = Block::default().title("Memory").borders(Borders::ALL);
-    f.render_widget(memory_block, size);
+    let memory_widget = Paragraph::new(memory_text)
+        .block(memory_block)
+        .alignment(Alignment::Center);
+
+    f.render_widget(memory_widget, size);
+}
+
+fn get_memory_strs(mem: &BitVec) -> Vec<String> {
+    let mut byte_strs: Vec<String> = mem
+        .chunks(8)
+        .map(|c| c.iter().map(|b| if *b { '1' } else { '0' }).collect())
+        .collect();
+
+    // complete the last byte with underscores
+    let last_byte = byte_strs.last_mut().unwrap();
+    let num_missing = 8 - last_byte.len();
+    last_byte.extend((0..num_missing).map(|_| '_'));
+
+    // get the chunks of bytes
+    let byte_chunks = byte_strs.chunks(BYTES_PER_LINE);
+    let num_chunks = byte_chunks.len();
+
+    // print each byte chunk as a line
+    byte_chunks
+        .enumerate()
+        .map(|(chunk_num, chunk)| {
+            let addr = chunk_num * BYTES_PER_LINE * 8;
+            let mut chunk_elts: Vec<String>;
+
+            let full_chunk = if chunk_num == num_chunks - 1 {
+                let num_missing = BYTES_PER_LINE - chunk.len();
+                chunk_elts = Vec::from(chunk);
+                chunk_elts.extend((0..num_missing).map(|_| "_".repeat(8)));
+                &chunk_elts
+            } else {
+                chunk
+            };
+
+            format!("[ADDR 0x{:012x}] ", addr) + &full_chunk.join(" ")
+        })
+        .collect::<Vec<String>>()
 }

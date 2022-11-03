@@ -64,7 +64,7 @@ impl<'a> CpuDebugger<'a> {
                 draw_title(f, chunks[0]);
                 draw_status(f, chunks[1], self.cpu, self.final_step, &self.run_result);
                 draw_registers(f, chunks[2], self.cpu);
-                draw_memory(f, chunks[3]);
+                draw_memory(f, chunks[3], self.cpu);
             })?;
 
             let event = read()?;
@@ -72,8 +72,8 @@ impl<'a> CpuDebugger<'a> {
             if let Event::Key(key_event) = event {
                 match key_event.code {
                     KeyCode::Char('q') => break,
-                    KeyCode::Left => self.cpu.backward().unwrap(),
-                    KeyCode::Right => self.cpu.forward().unwrap(),
+                    KeyCode::Left => self.cpu.backward()?,
+                    KeyCode::Right => self.cpu.forward()?,
                     _ => (),
                 }
             }

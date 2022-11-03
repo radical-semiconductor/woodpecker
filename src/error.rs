@@ -1,5 +1,5 @@
-use std::io;
 use std::fmt::{self, Display};
+use std::io;
 
 #[derive(Debug)]
 pub enum ExecutionError {
@@ -20,37 +20,35 @@ impl Display for ExecutionError {
 
 impl From<io::Error> for ExecutionError {
     fn from(err: io::Error) -> Self {
-        ExecutionError::IoError(err)    
+        ExecutionError::IoError(err)
     }
 }
 
 impl From<ParseError> for ExecutionError {
     fn from(err: ParseError) -> Self {
-        ExecutionError::ParseError(err)    
+        ExecutionError::ParseError(err)
     }
 }
 
 impl From<CpuError> for ExecutionError {
     fn from(err: CpuError) -> Self {
-        ExecutionError::CpuError(err)    
+        ExecutionError::CpuError(err)
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum ParseError {
     BitCountParseError,
-    CommandParseError {
-        cmd: String,
-        line: usize
-    }
+    CommandParseError { cmd: String, line: usize },
 }
 
-
-impl Display for ParseError{
+impl Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::BitCountParseError => write!(f, "invalid bit count specification"),
-            Self::CommandParseError { cmd, line } => write!(f, "invalid command '{}' at line {}", cmd, line)
+            Self::CommandParseError { cmd, line } => {
+                write!(f, "invalid command '{}' at line {}", cmd, line)
+            }
         }
     }
 }
