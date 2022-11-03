@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 bitvec = "1.0.1"
 clap = { version = "4.0.18", features = ["derive"] }
+crossterm = "0.25.0"
+tui = "0.19.0"

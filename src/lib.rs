@@ -1,10 +1,13 @@
 mod cpu;
 mod error;
+mod ui;
 
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
+
 use cpu::{Command, Cpu};
 use error::{ExecutionError, ParseError};
+use ui::show_cpu;
 
 pub type Result<T> = std::result::Result<T, ExecutionError>;
 
@@ -13,6 +16,8 @@ const BYTES_PER_LINE: usize = 8;
 
 pub fn run(name: &str) -> Result<()> {
     let (cpu, commands) = load_cpu_and_commands(name)?;
+
+    show_cpu().unwrap();
 
     Ok(())
 }
@@ -38,9 +43,8 @@ fn load_cpu_and_commands(name: &str) -> Result<(Cpu, Vec<Command>)>{
 }
 
 fn parse_mem_size(line: &str) -> Result<usize> {
-    let mem_size_str = line.split(":").next().ok_or(ParseError::BitCountParseError)?;
+    let mem_size_str = line.split(":").nth(1).ok_or(ParseError::BitCountParseError)?.trim();
     let mem_size = mem_size_str.parse().map_err(|_| ParseError::BitCountParseError)?;
-
     Ok(mem_size)
 }
 
@@ -59,38 +63,3 @@ fn parse_command(line: &str, line_num: usize) -> Result<Command> {
         }   
     }
 }
-
-/* fn dump_memory(mem: &BitSlice) {
-    // turn the bytes into Strings
-    let mut byte_strs: Vec<String> = mem.chunks(8)
-        .map(|c| c.iter().map(|b| if *b { '1' } else { '0' }).collect())
-        .collect();
-
-    // complete the last byte with underscores
-    let last_byte = byte_strs.last_mut().unwrap();
-    let num_missing = 8 - last_byte.len();
-    last_byte.extend((0..num_missing).map(|_| '_'));
-
-    // get the chunks of bytes
-    let byte_chunks = byte_strs.chunks(BYTES_PER_LINE);
-    let num_chunks = byte_chunks.len();
-
-    // print each byte chunk as a line
-    for (chunk_num, chunk) in byte_chunks.enumerate() {
-        let addr = chunk_num * BYTES_PER_LINE * 8;
-        let mut chunk_elts: Vec<String>;
-
-        // extend the chunk if necessary by "bytes" of underscores
-        let full_chunk = if chunk_num == num_chunks - 1 {
-            let num_missing = BYTES_PER_LINE - chunk.len();
-            chunk_elts = Vec::from(chunk);
-            chunk_elts.extend((0..num_missing).map(|_| "_".repeat(8)));
-            &chunk_elts
-        } else {
-            chunk
-        };
-
-        let line = format!("[ADDR 0x{:012x}] ", addr) + &full_chunk.join(" "); 
-        println!("{}", line);
-    }
-} */
