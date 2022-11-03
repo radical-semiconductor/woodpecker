@@ -49,7 +49,7 @@ pub fn interact_cpu(cpu: &mut Cpu, run_result: std::result::Result<(), CpuError>
 
             draw_title(f, chunks[0]);
             draw_status(f, chunks[1], cpu, final_step, &run_result);
-            draw_registers(f, chunks[2]);
+            draw_registers(f, chunks[2], cpu);
 
             let memory_block = Block::default().title("Memory").borders(Borders::ALL);
             f.render_widget(memory_block, chunks[3]);
@@ -180,14 +180,14 @@ fn draw_status<B: Backend>(
     f.render_widget(err_widget, chunks[2]);
 }
 
-fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect) {
+fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect, cpu: &Cpu) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
         .split(size);
 
     let addr_text = Span::styled(
-        "0x000000000000ab83",
+        format!("0x{:012x}", cpu.addr),
         Style::default().fg(Color::LightYellow),
     );
     let addr_block = Block::default().title("Address").borders(Borders::ALL);
@@ -195,7 +195,7 @@ fn draw_registers<B: Backend>(f: &mut Frame<B>, size: Rect) {
         .block(addr_block)
         .alignment(Alignment::Center);
 
-    let store_text = Span::styled("1 (set)", Style::default().fg(Color::LightYellow));
+    let store_text = Span::styled(cpu.store.to_string(), Style::default().fg(Color::LightYellow));
     let store_block = Block::default().title("Store").borders(Borders::ALL);
     let store_widget = Paragraph::new(store_text)
         .block(store_block)
