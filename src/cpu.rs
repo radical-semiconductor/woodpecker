@@ -1,7 +1,5 @@
-use std::fmt;
-
-use crate::error::CpuError;
 use bitvec::prelude::*;
+use std::fmt;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
@@ -22,123 +20,45 @@ impl fmt::Display for Command {
     }
 }
 
-#[derive(Debug)]
-pub struct Cpu {
+pub struct Cpu<'a> {
     pub memory: BitVec,
     pub addr: usize,
     pub store: bool,
     pub step: usize,
-    pub commands: Vec<Command>,
-    store_stack: Vec<bool>,
+    pub done: bool,
+    commands: &'a [Command],
 }
 
-impl Cpu {
+impl<'a> Cpu<'a> {
     pub fn new(size: usize, commands: &[Command]) -> Cpu {
         Cpu {
             memory: bitvec![0; size],
             addr: 0,
             store: false,
             step: 0,
-            commands: Vec::from(commands),
-            store_stack: Vec::new(),
+            done: false,
+            commands,
         }
     }
 
-    pub fn run(&mut self) -> Result<(), CpuError> {
-        for _ in 0..self.commands.len() {
-            self.forward()?;
-        }
-
-        Ok(())
-    }
-
-    pub fn forward(&mut self) -> Result<(), CpuError> {
-        if self.step < self.commands.len() {
+    pub fn step(&mut self) {
+        if !self.done {
+            let current_bit = self.memory[self.addr];
             match self.commands[self.step] {
-                Command::Inc => self.increment_addr()?,
-                Command::Inv => self.invert_bit(),
-                Command::Load => self.load_bit_to_store(),
-                Command::Cdec => self.decrement_addr_if_store_set()?,
+                Command::Inc => self.addr = self.addr.wrapping_add(1),
+                Command::Inv => self.memory.set(self.addr, !current_bit),
+                Command::Load => self.store = current_bit,
+                Command::Cdec => {
+                    if self.store {
+                        self.addr = self.addr.wrapping_sub(1);
+                    }
+                }
             }
 
             self.step += 1;
-        }
-
-        Ok(())
-    }
-
-    pub fn backward(&mut self) -> Result<(), CpuError> {
-        if self.step > 0 {
-            self.step -= 1;
-
-            match self.commands[self.step] {
-                Command::Inc => self.decrement_addr()?,
-                Command::Inv => self.invert_bit(),
-                Command::Load => self.unload_bit_from_store(),
-                Command::Cdec => self.increment_addr_if_store_set()?,
+            if self.step == self.commands.len() {
+                self.done = true;
             }
         }
-
-        Ok(())
-    }
-
-    pub fn get_command(&self) -> Option<Command> {
-        match self.step {
-            0 => None,
-            step => Some(self.commands[step - 1]),
-        }
-    }
-
-    fn increment_addr(&mut self) -> Result<(), CpuError> {
-        // try to increment the address
-        if self.addr < self.memory.len() {
-            self.addr += 1;
-            Ok(())
-        } else {
-            Err(CpuError::OutOfMemory)
-        }
-    }
-
-    fn decrement_addr(&mut self) -> Result<(), CpuError> {
-        // try to decrement the address
-        if let Some(addr) = self.addr.checked_sub(1) {
-            self.addr = addr;
-            Ok(())
-        } else {
-            Err(CpuError::NegativeAddr)
-        }
-    }
-
-    fn increment_addr_if_store_set(&mut self) -> Result<(), CpuError> {
-        // conditionally incrementif store is set
-        if self.store {
-            self.increment_addr()
-        } else {
-            Ok(())
-        }
-    }
-
-    fn decrement_addr_if_store_set(&mut self) -> Result<(), CpuError> {
-        // conditionally decrement if store is set
-        if self.store {
-            self.decrement_addr()
-        } else {
-            Ok(())
-        }
-    }
-
-    fn invert_bit(&mut self) {
-        // invert a single bit
-        let bit = self.memory[self.addr];
-        self.memory.set(self.addr, !bit);
-    }
-
-    fn load_bit_to_store(&mut self) {
-        self.store_stack.push(self.store);
-        self.store = self.memory[self.addr]
-    }
-
-    fn unload_bit_from_store(&mut self) {
-        self.store = self.store_stack.pop().unwrap();
     }
 }
