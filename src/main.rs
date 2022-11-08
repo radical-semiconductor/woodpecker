@@ -1,5 +1,6 @@
+use anyhow::Result;
 use clap::{Parser, Subcommand};
-use woodpecker::{run, test, Result};
+use woodpecker::{debug, test};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -11,7 +12,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Run { name: String },
+    Debug { name: String },
     Test { 
         challenge: u8,
         name: String,
@@ -22,7 +23,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();            
 
     match &cli.command {
-        Commands::Run { name } => run(name),
+        Commands::Debug { name } => debug(name),
         Commands::Test { challenge, name } => test(challenge, name),
     }
 }

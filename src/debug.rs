@@ -1,124 +1,155 @@
-use crossterm::{
-    event::{read, Event, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
-use std::io;
-use tui::{
-    backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout},
-    Terminal,
-};
+use std::cmp;
 
-use crate::{
-    cpu::Cpu,
-    error::CpuError,
-    ui::{draw_memory, draw_registers, draw_status, draw_title},
-    Result,
-};
+use anyhow::Result;
+use thiserror::Error;
+use parse_int::parse;
 
-pub struct CpuDebugger<'a> {
-    cpu: &'a mut Cpu,
-    run_result: &'a std::result::Result<(), CpuError>,
-    step: usize,
-    final_step: usize,
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+
+use crate::cpu::Cpu;
+
+const LICENSE_MESSAGE: &'static str = r#"
+                      |              |            
+\ \  \ / _ \  _ \  _` | _ \  -_)  _| | /  -_)  _| 
+ \_/\_/\___/\___/\__,_|.__/\___|\__|_\_\\___|_|   
+                      _|                          
+
+        Woodpecker(R) Embedded Debugger
+                             
+          Version v0.3.2 ("Wild Oak")  
+         Copyright 2089 Arbor Systems.
+         Licensed to Kaizen Security. 
+                 Do not copy!                 
+"#;
+
+const HELP_MESSAGE: &'static str = r#"help  (h) => show this message
+step `n`       (s) => step the program forward `n` steps (default: 1)
+data           (d) => show the current register values
+mem `addr` `n` (m) => read `n` bits (default: 1) at address `addr` 
+list           (l) => show the current position in the program
+reset          (r) => reset the CPU
+quit           (q) => quit the debugger
+             
+list  (l) => show where in the program is executing now
+reset (r) => reset the cpu
+quit  (q) => show the current register values"#;
+
+#[derive(Error, Debug)]
+pub enum DebugError{
+    #[error("command provided is invalid")]
+    InvalidCommand,
+    #[error("argument missing from command")]
+    MissingArg,
 }
 
-impl<'a> CpuDebugger<'a> {
-    pub fn new(cpu: &'a mut Cpu, run_result: &'a std::result::Result<(), CpuError>) -> Self {
-        // we want to start viewing the error if applicable
-        let step = cpu.step + if run_result.is_err() { 1 } else { 0 };
+pub struct Debugger<'a> {
+    cpu: &'a mut Cpu<'a>,
+}
 
-        Self {
-            cpu,
-            run_result,
-            step,
-            final_step: step,
-        }
+impl<'a> Debugger<'a> {
+    pub fn new(cpu: &'a mut Cpu<'a>) -> Self {
+        Self { cpu }
     }
 
     pub fn interact(&mut self) -> Result<()> {
-        // set up terminal
-        let mut stdout = io::stdout();
-        execute!(stdout, EnterAlternateScreen)?;
-        enable_raw_mode()?;
+        let mut rl = Editor::<()>::new()?;
 
-        // fetch backend
-        let backend = CrosstermBackend::new(stdout);
-        let mut terminal = Terminal::new(backend)?;
+        println!("{}", LICENSE_MESSAGE);
 
-        // perform game loop
         loop {
-            terminal.draw(|f| {
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .margin(1)
-                    .constraints(
-                        [
-                            Constraint::Length(3),
-                            Constraint::Length(3),
-                            Constraint::Length(3),
-                            Constraint::Percentage(100),
-                        ]
-                        .as_ref(),
-                    )
-                    .split(f.size());
-
-                draw_title(f, chunks[0]);
-                draw_status(
-                    f,
-                    chunks[1],
-                    self.cpu,
-                    &self.run_result,
-                    self.step,
-                    self.final_step,
-                );
-                draw_registers(f, chunks[2], self.cpu);
-                draw_memory(f, chunks[3], self.cpu);
-            })?;
-
-            let event = read()?;
-
-            if let Event::Key(key_event) = event {
-                match key_event.code {
-                    KeyCode::Char('q') => break,
-                    KeyCode::Left => self.backward()?,
-                    KeyCode::Right => self.forward()?,
-                    _ => (),
+            let readline = rl.readline("dbg > ");
+            let line = match readline {
+                Ok(line) => {
+                    rl.add_history_entry(&line);
+                    line
                 }
-            }
-        }
+                Err(ReadlineError::Interrupted) => break,
+                Err(ReadlineError::Eof) => break,
+                Err(err) => return Err(err.into()),
+            };
 
-        // restore terminal
-        execute!(terminal.backend_mut(), LeaveAlternateScreen,)?;
-        terminal.show_cursor()?;
-        disable_raw_mode()?;
+            let mut cmd_args = line.trim().split_whitespace();
+
+            let cmd_op = match cmd_args.next() {
+                Some(op) => op,
+                None => continue,
+            };
+
+            let cmd_result = match cmd_op {
+                "help"  | "h" => { println!("{}", HELP_MESSAGE); Ok(()) },
+                "step"  | "s" => self.do_step(&mut cmd_args),
+                "data"  | "d" => self.do_data(),
+                "mem"   | "m" => self.do_mem(&mut cmd_args),
+                "list"  | "l" => self.do_list(),
+                "reset" | "r" => { self.cpu.reset(); Ok(()) },
+                "quit"  | "q" => break,
+                &_ => Err(DebugError::InvalidCommand.into()),
+            };
+
+            cmd_result.unwrap_or_else(|err| println!("{}", err));
+        }
 
         Ok(())
     }
 
-    fn forward(&mut self) -> Result<()> {
-        if self.step < self.final_step {
-            self.step += 1;
+    fn do_step<'b>(&mut self, args: &mut impl Iterator<Item = &'b str>) -> Result<()> {
+        if !self.cpu.done {
+            let steps: u16 = if let Some(step_str) = args.next() {
+                parse(step_str)?
+            } else {
+                1
+            };
 
-            // make sure we don't step the CPU into an error
-            if !(self.step == self.final_step && self.run_result.is_err()) {
-                self.cpu.forward()?;
+            for _ in 0..steps {
+                self.cpu.step();
             }
+        }
+
+        if self.cpu.done {
+            println!("Execution complete. Use 'r' to reset.");
         }
 
         Ok(())
     }
 
-    fn backward(&mut self) -> Result<()> {
-        if self.step > 0 {
-            // make sure we don't try to step the CPU out of an error
-            if !(self.step == self.final_step && self.run_result.is_err()) {
-                self.cpu.backward()?;
-            }
+    fn do_data(&self) -> Result<()> {
+        println!("ADDR:  0x{:04x}", self.cpu.addr);
+        println!("STORE: 0x{}", if self.cpu.store { "1" } else { "0" });
 
-            self.step -= 1;
+        Ok(())
+    }
+
+    fn do_mem<'b>(&mut self, args: &mut impl Iterator<Item = &'b str>) -> Result<()> {
+        let addr: u16 = if let Some(addr_str) = args.next() {
+            parse(addr_str)?
+        } else {
+            return Err(DebugError::MissingArg.into());
+        };
+
+        let count: u16 = if let Some(count_str) = args.next() {
+            parse(count_str)?
+        } else {
+            1
+        };
+
+        let end = cmp::min(addr as usize + count as usize, self.cpu.memory.len());
+        let data = &self.cpu.memory[addr as usize..end as usize];
+
+        println!("MEM[0x{:04x}:0x{:04x}]: {}", addr, end, data);
+
+        Ok(())
+    }
+
+    fn do_list(&self) -> Result<()> {
+        let lower: usize = self.cpu.step.saturating_sub(5);
+        let upper: usize = cmp::min(self.cpu.step.saturating_add(5), self.cpu.commands.len());
+
+        for cmd_idx in lower..upper {
+            let marker: char = if cmd_idx == self.cpu.step { '>' } else { ' ' };
+            println!("{} [0x{:08x}] {}", marker, cmd_idx, &self.cpu.commands[cmd_idx]);
         }
+
 
         Ok(())
     }

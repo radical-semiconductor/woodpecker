@@ -10,5 +10,7 @@ anyhow = "1.0.66"
 bitvec = "1.0.1"
 clap = { version = "4.0.18", features = ["derive"] }
 crossterm = "0.25.0"
+parse_int = "0.6.0"
+rustyline = "10.0.0"
 thiserror = "1.0.37"
 tui = "0.19.0"
