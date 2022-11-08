@@ -18,6 +18,7 @@ pub fn debug(name: &str) -> Result<()> {
 }
 
 pub fn test(challenge: &u8, name: &str) -> Result<()> {
+    let commands = parse_program(name)?;
     Ok(())
 }
 

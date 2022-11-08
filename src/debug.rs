@@ -23,17 +23,13 @@ const LICENSE_MESSAGE: &'static str = r#"
                  Do not copy!                 
 "#;
 
-const HELP_MESSAGE: &'static str = r#"help  (h) => show this message
+const HELP_MESSAGE: &'static str = r#"help           (h) => show this message
 step `n`       (s) => step the program forward `n` steps (default: 1)
 data           (d) => show the current register values
 mem `addr` `n` (m) => read `n` bits (default: 1) at address `addr` 
 list           (l) => show the current position in the program
 reset          (r) => reset the CPU
-quit           (q) => quit the debugger
-             
-list  (l) => show where in the program is executing now
-reset (r) => reset the cpu
-quit  (q) => show the current register values"#;
+quit           (q) => quit the debugger"#;
 
 #[derive(Error, Debug)]
 pub enum DebugError{
