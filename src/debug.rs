@@ -110,20 +110,20 @@ impl<'a> Debugger<'a> {
     }
 
     fn do_data(&self) -> Result<()> {
-        println!("ADDR:  0x{:04x}", self.cpu.addr);
+        println!("ADDR:  0x{:08x}", self.cpu.addr);
         println!("STORE: 0x{}", if self.cpu.store { "1" } else { "0" });
 
         Ok(())
     }
 
     fn do_mem<'b>(&mut self, args: &mut impl Iterator<Item = &'b str>) -> Result<()> {
-        let addr: u16 = if let Some(addr_str) = args.next() {
+        let addr: u32 = if let Some(addr_str) = args.next() {
             parse(addr_str)?
         } else {
             return Err(DebugError::MissingArg.into());
         };
 
-        let count: u16 = if let Some(count_str) = args.next() {
+        let count: u32 = if let Some(count_str) = args.next() {
             parse(count_str)?
         } else {
             1
@@ -132,7 +132,7 @@ impl<'a> Debugger<'a> {
         let end = cmp::min(addr as usize + count as usize, self.cpu.memory.len());
         let data = &self.cpu.memory[addr as usize..end as usize];
 
-        println!("MEM[0x{:04x}:0x{:04x}]: {}", addr, end, data);
+        println!("MEM[0x{:08x}:0x{:08x}]: {}", addr, end, data);
 
         Ok(())
     }

@@ -1,5 +1,6 @@
 mod cpu;
 mod debug;
+mod challenge;
 
 use anyhow::Result;
 use std::fs::File;
@@ -7,6 +8,7 @@ use std::io::{prelude::*, BufReader};
 
 use cpu::{Command, Cpu};
 use debug::Debugger;
+use challenge::evaluate_solution;
 
 pub fn debug(name: &str) -> Result<()> {
     let commands = parse_program(name)?;
@@ -17,8 +19,10 @@ pub fn debug(name: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn test(challenge: &u8, name: &str) -> Result<()> {
-    let commands = parse_program(name)?;
+pub fn solve(challenge: u8, name: &str) -> Result<()> {
+    let commands = parse_program(name)?;  
+    evaluate_solution(challenge, &commands)?;
+
     Ok(())
 }
 

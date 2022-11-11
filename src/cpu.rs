@@ -3,12 +3,12 @@ use std::fmt;
 use std::str::FromStr;
 use thiserror::Error;
 
-const INC_STR: &'static str = "INC";
-const INV_STR: &'static str = "INV";
-const LOAD_STR: &'static str = "LOAD";
-const CDEC_STR: &'static str = "CDEC";
+const INC_STR: &str = "INC";
+const INV_STR: &str = "INV";
+const LOAD_STR: &str = "LOAD";
+const CDEC_STR: &str = "CDEC";
 
-const MEM_SIZE: usize = 1 << 16;
+const MEM_SIZE: usize = 1 << 32;
 
 
 #[derive(Debug, Error)]
@@ -53,8 +53,8 @@ impl FromStr for Command {
 }
 
 pub struct Cpu<'a> {
-    pub memory: BitVec,
-    pub addr: u16,
+    pub memory: BitVec<u8>,
+    pub addr: u32,
     pub store: bool,
     pub step: usize,
     pub done: bool,
@@ -64,7 +64,7 @@ pub struct Cpu<'a> {
 impl<'a> Cpu<'a> {
     pub fn new(commands: &'a[Command]) -> Self {
         Self {
-            memory: bitvec![0; MEM_SIZE],
+            memory: bitvec![u8, Lsb0; 0; MEM_SIZE],
             addr: 0,
             store: false,
             step: 0,
