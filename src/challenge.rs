@@ -49,12 +49,15 @@ pub fn get_full_add_problem() -> (BitVec<u8>, BitVec<u8>) {
     let b: BigUint = rng.gen_biguint(255);
     let sum: BigUint = &a + &b;
 
-    let a_bits = BitVec::<_, Lsb0>::try_from_vec(a.to_bytes_le()).unwrap();
-    let b_bits = BitVec::<_, Lsb0>::try_from_vec(b.to_bytes_le()).unwrap();
+    let mut a_bits = BitVec::<_, Lsb0>::try_from_vec(a.to_bytes_le()).unwrap();
+    let mut b_bits = BitVec::<_, Lsb0>::try_from_vec(b.to_bytes_le()).unwrap();
     let sum_bits = BitVec::<_, Lsb0>::try_from_vec(sum.to_bytes_le()).unwrap();
 
-    input_mem[0..255].copy_from_bitslice(&a_bits[..255]);
-    input_mem[255..510].copy_from_bitslice(&b_bits[..255]);
+    a_bits.resize(255, false);
+    b_bits.resize(255, false);
+
+    input_mem[0..a_bits.len()].copy_from_bitslice(&a_bits);
+    input_mem[255..][..b_bits.len()].copy_from_bitslice(&b_bits);
 
     (input_mem, sum_bits)
 }
