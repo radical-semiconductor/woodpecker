@@ -143,7 +143,7 @@ We also encourage you to send over whatever compilers you built to generate your
 
 ### Should the programs I'm writing get kind of long?
 
-> They should be! This architecture is not one you'd want to use in practice. We recommend writing code to generate these programs--after the first couple challenges, they get infeasible to maintain by hand quickly.
+> They should! This architecture is not one you'd want to use in practice. We recommend writing code to generate these programs--after the first couple challenges, they get infeasible to maintain by hand quickly.
 
 ### What if I want to improve the debugger/make a new challenge?
 
