@@ -69,7 +69,7 @@ We plan to have a scoreboard for each subgoal, ranking both instruction and memo
 
 To install the woodpecker toolchain to debug and test these programs, install Cargo as [described here](https://doc.rust-lang.org/cargo/getting-started/installation.html). 
 
-Then, in a terminal, run `cargo install woodpecker-cpu`.
+Then, clone the repository. In a terminal, `cd` into the repository and then run `cargo install --path .`.
 
 ## Running and debugging
 
