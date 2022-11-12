@@ -65,15 +65,28 @@ If you make it through all the existing challenges, you can try to find a soluti
 
 ## Installation
 
-To install the woodpeckr toolchain to debug and test these programs, install Cargo as [described here](https://doc.rust-lang.org/cargo/getting-started/installation.html) and then in a terminal run `cargo install woodpecker-cpu`.
+To install the woodpeckr toolchain to debug and test these programs, install Cargo as [described here](https://doc.rust-lang.org/cargo/getting-started/installation.html). 
+
+Then, in a terminal, run `cargo install woodpecker-cpu`.
 
 ## Running and debugging
 
 Woodpecker programs are text files where every line is `INV`, `INC`, `LOAD`, or `CDEC`, and usually bear a  `.wpk` file extension. 
 
-To test whether a Woodpecker program passes a challenge, run `woodpecker solve <challenge #> <program name>`, e.g. `woodpecker solve 2 adder.wpk` to test `adder.wpk` on the 16-bit addition challenge.
+To test whether a Woodpecker program passes a challenge, run 
+```bash
+woodpecker solve <challenge #> <program name>
+```
 
-To debug a woodpecker challenge, use `woodpecker debug <program name>`. You'll be dropped into a debugger with various commands. Type `help` to see how to use them.
+e.g. `woodpecker solve 2 adder.wpk` to test `adder.wpk` on the 16-bit addition challenge.
+
+To debug a woodpecker challenge, use
+
+```bash
+woodpecker debug <program name>
+```
+
+You'll be dropped into a debugger with various commands. Type `help` to see how to use them.
 
 ## Challenge Descriptions
 
@@ -83,27 +96,27 @@ NOTE: all integers are represented LSB first in memory.
 
 ### Challenge 0: XOR
 
-**Input:** two bits $A$ and $B$ at addresses 0 and 1
-
-**Output:** the XOR of the bits, $A \oplus B$, at address 2
+> **Input:** two bits $A$ and $B$ at addresses 0 and 1
+>
+> **Output:** the XOR of the bits, $A \oplus B$, at address 2
 
 ### Challenge 1: 1-bit addition
 
-**Input:** two bits $A$ and $B$ at addresses 0 and 1
-
-**Output:** the 2-bit sum of the bits, $A + B$, at addresses 2-3.
+> **Input:** two bits $A$ and $B$ at addresses 0 and 1
+>
+> **Output:** the 2-bit sum of the bits, $A + B$, at addresses 2-3.
 
 ### Challenge 2: 16-bit addition
 
-**Input:** two 16-bit numbers $A$ and $B$ at addresses 0-15 and 16-31.
-
-**Output:** the 17-bit sum of the numbers, $A + B$, at addresses 32-48.
+> **Input:** two 16-bit numbers $A$ and $B$ at addresses 0-15 and 16-31.
+>
+> **Output:** the 17-bit sum of the numbers, $A + B$, at addresses 32-48.
 
 ### Challenge 3: 16-bit multiplication
 
-**Input:** two 16-bit numbers $A$ and $B$ at addresses 0-15 and 16-31.
-
-**Output:** the 32-bit product of the numbers, $A * B$, at addresses 32-64.
+> **Input:** two 16-bit numbers $A$ and $B$ at addresses 0-15 and 16-31.
+>
+> **Output:** the 32-bit product of the numbers, $A * B$, at addresses 32-64.
 
 
 
