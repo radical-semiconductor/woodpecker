@@ -2,6 +2,8 @@
 
 A down-to-the-metal ongoing cryptography challenge designed by [Radical Semiconductor](https://radicalsemiconductor.com/) (we're [hiring](https://radicalsemiconductor.com/jobs)!)
 
+Send us your solutions (and resumes!) at woodpecker@radicalsemiconductor.com.
+
 ## Story
 
 > The year is 2089. You are a cryptographer for Kaizen Security, a company specializing in endpoints securing traffic to and from on-network company artificial intelligences.
