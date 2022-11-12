@@ -56,12 +56,14 @@ To make things easier, we provide subgoals along the way.
 * Perform a 1-bit full add
 * Perform 16-bit addition
 * Perform 16-bit multiplication
-* [to be released] Perform 16-bit addition mod $q = 2^{16} - 17$
-* [to be released] Perform 16-bit multiplication mod $q$
-* [to be released] Add two points over the provided elliptic curve
-* [to be released] Perform scalar multiplication on the provided elliptic curve
+* [To Be Released] Perform 16-bit addition mod $q = 2^{16} - 17$
+* [To Be Released] Perform 16-bit multiplication mod $q$
+* [To Be Released] Add two points over the provided elliptic curve
+* [To Be Released] Perform scalar multiplication on the provided elliptic curve
 
-If you make it through all the existing challenges, you can try to find a solution with fewer instructions or one using less memory. If enough people take interest in this, we plan to have a scoreboard for each subgoal, ranking both instruction and memory usage.
+If you make it through all the existing challenges, you can try to find a solution with fewer instructions or one using less memory.
+
+We plan to have a scoreboard for each subgoal, ranking both instruction and memory usage, as well as style points for particularly cool or clever implementations!
 
 ## Installation
 
@@ -118,7 +120,12 @@ NOTE: all integers are represented LSB first in memory.
 >
 > **Output:** the 32-bit product of the numbers, $A * B$, at addresses 32-64.
 
+## Submitting Code
 
+Send your woodpecker programs, or instructions to generate them, to woodpecker@radicalsemiconductor.com. Documentation is appreciated!
+The first 10 people to get through Challenge 3 get a free t-shirt!
+
+We also encourage you to send over whatever compilers you built to generate your programs too. Particularly cool or clever compiler stacks will get shoutouts on the leaderboard!
 
 ## FAQ
 
@@ -148,4 +155,4 @@ NOTE: all integers are represented LSB first in memory.
 
 ### Can I apply to join anyway if I think you're cool?
 
-> Please do--we'd love to chat!
+> Please do--we'd love to chat! Just reach out to hiring@radicalsemiconductor.com.
