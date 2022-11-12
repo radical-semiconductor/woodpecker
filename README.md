@@ -65,7 +65,7 @@ If you make it through all the existing challenges, you can try to find a soluti
 
 ## Installation
 
-To install the woodpeckr toolchain to debug and test these programs, install Cargo as [described here](https://doc.rust-lang.org/cargo/getting-started/installation.html). 
+To install the woodpecker toolchain to debug and test these programs, install Cargo as [described here](https://doc.rust-lang.org/cargo/getting-started/installation.html). 
 
 Then, in a terminal, run `cargo install woodpecker-cpu`.
 
@@ -130,7 +130,7 @@ NOTE: all integers are represented LSB first in memory.
 
 > We've made sure to solve all of these before release. (We promise!)
 
-### The woodpeckr debugger/tester is broken, what do I do?
+### The woodpecker debugger/tester is broken, what do I do?
 
 > Message woodpecker@radicalsemiconductor.com with your issue and we'll get on it.
 
