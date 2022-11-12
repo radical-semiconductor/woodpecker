@@ -1,6 +1,6 @@
 # woodpecker 🪶
 
-A down-to-the-metal ongoing cryptography challenge designed by Radical Semiconductor.
+A down-to-the-metal ongoing cryptography challenge designed by [Radical Semiconductor](https://radicalsemiconductor.com/) (we're [hiring](https://radicalsemiconductor.com/jobs)!)
 
 ## Story
 
