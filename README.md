@@ -124,28 +124,28 @@ NOTE: all integers are represented LSB first in memory.
 
 ### Why's it called "woodpecker"?
 
-The little tape head bobbing back and forth and inverting bits reminded one of us of a woodpecker flying around a tree and pecking at it. She wrote the code so the name stuck.
+> The little tape head bobbing back and forth and inverting bits reminded one of us of a woodpecker flying around a tree and pecking at it. She wrote the code so the name stuck.
 
 ### How do I know these challenges are possible?
 
-We've made sure to solve all of these before release. (We promise!)
+> We've made sure to solve all of these before release. (We promise!)
 
 ### The woodpeckr debugger/tester is broken, what do I do?
 
-Message woodpecker@radicalsemiconductor.com with your issue and we'll get on it.
+> Message woodpecker@radicalsemiconductor.com with your issue and we'll get on it.
 
 ### Should the programs I'm writing get kind of long?
 
-They should be! This architecture is not one you'd want to use in practice. We recommend writing code to generate these programs--after the first couple challenges, they get infeasible to maintain by hand quickly.
+> They should be! This architecture is not one you'd want to use in practice. We recommend writing code to generate these programs--after the first couple challenges, they get infeasible to maintain by hand quickly.
 
 ### What if I want to improve the debugger/make a new challenge?
 
-Make a pull request! We'd love your help.
+> Make a pull request! We'd love your help.
 
 ### Are there other challenges like this out there?
 
-If this was hard but fun, ping us at hiring@radicalsemiconductor.com with your resume. We designed this somewhat unique problem to require the same kind of thinking our work does, so please join us!
+> If this was hard but fun, ping us at hiring@radicalsemiconductor.com with your resume. We designed this somewhat unique problem to require the same kind of thinking our work does, so please join us!
 
 ### Can I apply to join anyway if I think you're cool?
 
-Please do--we'd love to chat!
+> Please do--we'd love to chat!
