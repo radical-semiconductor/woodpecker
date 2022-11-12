@@ -91,7 +91,7 @@ impl<'a> Debugger<'a> {
 
     fn do_step<'b>(&mut self, args: &mut impl Iterator<Item = &'b str>) -> Result<()> {
         if !self.cpu.done {
-            let steps: u16 = if let Some(step_str) = args.next() {
+            let steps: u32 = if let Some(step_str) = args.next() {
                 parse(step_str)?
             } else {
                 1

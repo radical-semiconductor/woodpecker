@@ -1,12 +1,11 @@
 use anyhow::Result;
 use bitvec::prelude::*;
-use num_bigint::{BigUint, RandBigInt};
 use rand::Rng;
 use thiserror::Error;
 
 use crate::cpu::{Command, Cpu};
 
-const NUM_TRIALS: u8 = 50;
+const NUM_TRIALS: u8 = 100;
 
 #[derive(Debug, Error)]
 pub enum ChallengeError {
@@ -44,22 +43,33 @@ pub fn get_one_bit_add_problem() -> (BitVec<u8>, BitVec<u8>) {
 pub fn get_full_add_problem() -> (BitVec<u8>, BitVec<u8>) {
     let mut rng = rand::thread_rng();
 
-    let mut input_mem = bitvec![u8, Lsb0; 0; 510];
-    let a: BigUint = rng.gen_biguint(255);
-    let b: BigUint = rng.gen_biguint(255);
-    let sum: BigUint = &a + &b;
+    let mut input_mem = bitvec![u8, Lsb0; 0; 32];
+    let mut output_mem = bitvec![u8, Lsb0; 0; 17];
 
-    let mut a_bits = BitVec::<_, Lsb0>::try_from_vec(a.to_bytes_le()).unwrap();
-    let mut b_bits = BitVec::<_, Lsb0>::try_from_vec(b.to_bytes_le()).unwrap();
-    let sum_bits = BitVec::<_, Lsb0>::try_from_vec(sum.to_bytes_le()).unwrap();
+    let a: u16 = rng.gen();
+    let b: u16 = rng.gen();
 
-    a_bits.resize(255, false);
-    b_bits.resize(255, false);
+    input_mem[0..16].store::<u16>(a);
+    input_mem[16..32].store::<u16>(b);
+    output_mem.store::<u32>(a as u32 + b as u32);
 
-    input_mem[0..a_bits.len()].copy_from_bitslice(&a_bits);
-    input_mem[255..][..b_bits.len()].copy_from_bitslice(&b_bits);
+    (input_mem, output_mem)
+}
 
-    (input_mem, sum_bits)
+pub fn get_multiply_problem() -> (BitVec<u8>, BitVec<u8>) {
+    let mut rng = rand::thread_rng();
+
+    let mut input_mem = bitvec![u8, Lsb0; 0; 32];
+    let mut output_mem = bitvec![u8, Lsb0; 0; 32];
+
+    let a: u16 = rng.gen();
+    let b: u16 = rng.gen();
+
+    input_mem[0..16].store::<u16>(a);
+    input_mem[16..32].store::<u16>(b);
+    output_mem.store::<u32>(a as u32 * b as u32);
+
+    (input_mem, output_mem)
 }
 
 pub fn evaluate_solution(challenge: u8, commands: &[Command]) -> Result<()> {
@@ -69,6 +79,7 @@ pub fn evaluate_solution(challenge: u8, commands: &[Command]) -> Result<()> {
         0 => get_xor_problem,
         1 => get_one_bit_add_problem,
         2 => get_full_add_problem,
+        3 => get_multiply_problem,
         _ => return Err(ChallengeError::InvalidChallenge.into()),
     };
 
