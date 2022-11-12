@@ -74,7 +74,7 @@ Then, in a terminal, run `cargo install woodpecker-cpu`.
 Woodpecker programs are text files where every line is `INV`, `INC`, `LOAD`, or `CDEC`, and usually bear a  `.wpk` file extension. 
 
 To test whether a Woodpecker program passes a challenge, run 
-```bash
+```
 woodpecker solve <challenge #> <program name>
 ```
 
@@ -82,7 +82,7 @@ e.g. `woodpecker solve 2 adder.wpk` to test `adder.wpk` on the 16-bit addition c
 
 To debug a woodpecker challenge, use
 
-```bash
+```
 woodpecker debug <program name>
 ```
 
