@@ -4,7 +4,7 @@ A down-to-the-metal ongoing cryptography challenge designed by [Radical Semicond
 
 Send us your solutions (and resumes!) at woodpecker@radicalsemiconductor.com.
 
-IMPORTANT: you can send in solutions to individual challenges one at a time before you finish the whole set! Once we start hosting the leaderboard Wednesday, we'll just add your solutions as we receive them. Feel free to even send partial solutions, e.g. if you want to submit your resume as well!
+> **Helpful note:** you can send in solutions to individual challenges one at a time! Once the leaderboard starts Wednesday, we'll add your solutions as we receive them. Feel free to send partial solutions, e.g. if you want to submit your resume too!
 
 ## Story
 
