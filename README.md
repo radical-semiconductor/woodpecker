@@ -4,6 +4,8 @@ A down-to-the-metal ongoing cryptography challenge designed by [Radical Semicond
 
 Send us your solutions (and resumes!) at woodpecker@radicalsemiconductor.com.
 
+IMPORTANT: you can send in solutions to individual challenges one at a time before you finish the whole set! Once we start hosting the leaderboard Wednesday, we'll just add your solutions as we receive them. Feel free to even send partial solutions, e.g. if you want to submit your resume as well!
+
 ## Story
 
 > The year is 2089. You are a cryptographer for Kaizen Security, a company specializing in endpoints securing traffic to and from on-network company artificial intelligences.
