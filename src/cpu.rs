@@ -10,7 +10,6 @@ const CDEC_STR: &str = "CDEC";
 
 const MEM_SIZE: usize = 1 << 32;
 
-
 #[derive(Debug, Error)]
 #[error("invalid CPU command '{command_text}'")]
 pub struct ParseCommandError {
@@ -19,19 +18,19 @@ pub struct ParseCommandError {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
-    Inc,
+    Inc(u32),
     Inv,
     Load,
-    Cdec,
+    Cdec(u32),
 }
 
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Command::Inc => write!(f, "{}", INC_STR),
+            Command::Inc(n) => write!(f, "{} {}", INC_STR, n),
             Command::Inv => write!(f, "{}", INV_STR),
             Command::Load => write!(f, "{}", LOAD_STR),
-            Command::Cdec => write!(f, "{}", CDEC_STR),
+            Command::Cdec(n) => write!(f, "{} {}", CDEC_STR, n),
         }
     }
 }
@@ -40,12 +39,18 @@ impl FromStr for Command {
     type Err = ParseCommandError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            INC_STR => Ok(Self::Inc),
-            INV_STR => Ok(Self::Inv),
-            LOAD_STR => Ok(Self::Load),
-            CDEC_STR => Ok(Self::Cdec),
-            s => Err(ParseCommandError {
+        match s.split_whitespace().collect::<Vec<_>>().as_slice() {
+            [INC_STR] => Ok(Self::Inc(1)),
+            [INC_STR, nstr] => nstr.parse().map(Self::Inc).map_err(|_| ParseCommandError {
+                command_text: s.to_owned() + ": invalid repetition count",
+            }),
+            [INV_STR] => Ok(Self::Inv),
+            [LOAD_STR] => Ok(Self::Load),
+            [CDEC_STR] => Ok(Self::Cdec(1)),
+            [CDEC_STR, nstr] => nstr.parse().map(Self::Cdec).map_err(|_| ParseCommandError {
+                command_text: s.to_owned() + ": invalid repetition count",
+            }),
+            _ => Err(ParseCommandError {
                 command_text: s.to_owned(),
             }),
         }
@@ -62,7 +67,7 @@ pub struct Cpu<'a> {
 }
 
 impl<'a> Cpu<'a> {
-    pub fn new(commands: &'a[Command]) -> Self {
+    pub fn new(commands: &'a [Command]) -> Self {
         Self {
             memory: bitvec![u8, Lsb0; 0; MEM_SIZE],
             addr: 0,
@@ -86,12 +91,12 @@ impl<'a> Cpu<'a> {
             let mem_idx = self.addr as usize;
             let current_bit = self.memory[mem_idx];
             match self.commands[self.step] {
-                Command::Inc => self.addr = self.addr.wrapping_add(1),
+                Command::Inc(n) => self.addr = self.addr.wrapping_add(n),
                 Command::Inv => self.memory.set(mem_idx, !current_bit),
                 Command::Load => self.store = current_bit,
-                Command::Cdec => {
+                Command::Cdec(n) => {
                     if self.store {
-                        self.addr = self.addr.wrapping_sub(1);
+                        self.addr = self.addr.wrapping_sub(n);
                     }
                 }
             }
