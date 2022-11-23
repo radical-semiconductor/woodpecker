@@ -48,6 +48,7 @@ There are four instructions that can control the processor:
 ## Task Description
 
 The company needs the processor to perform an [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signature, so that the AIs stored on corporate servers can verify their endpoint. Fortunately, their main processor has hashing capabilities, so you just need to implement addition and scalar multiplication on an elliptic curve.
+If you want to perform hashing however, you can still do so by implementing the SHA256 compression function, where the main processor can then ensure that the message will be properly padded and fit in a single block.
 
 Moreover, these particular AIs have a very low standard of cryptographic security (they're very trusting), so you'll only be using a 16-bit curve. For reference, the base field is $\operatorname{GF}(q)$ for $q = 2^{16} - 17$, with curve 
 $$y^2 = x^3 - 3x + 48879.$$
@@ -62,6 +63,7 @@ To make things easier, we provide subgoals along the way.
 * [To Be Released] Perform 16-bit multiplication mod $q$
 * [To Be Released] Add two points over the provided elliptic curve
 * [To Be Released] Perform scalar multiplication on the provided elliptic curve
+* Perform a SHA256 compression
 
 If you make it through all the existing challenges, you can try to find a solution with fewer instructions or one using less memory.
 
@@ -121,6 +123,12 @@ NOTE: all integers are represented LSB first in memory.
 > **Input:** two 16-bit numbers $A$ and $B$ at addresses 0-15 and 16-31.
 >
 > **Output:** the 32-bit product of the numbers, $A * B$, at addresses 32-64.
+
+### Challenge 8: SHA256 compression
+
+> **Input:** A 512-bit number, the message to be compressed, and a 256-bit number, the input chaining state. See `get_sha256_problem()` in <src/challenge.rs> for the details in the exact in-memory layout.
+> 
+> **Output:** A 256-bit number, the new chaining state.
 
 ## Submitting Code
 
