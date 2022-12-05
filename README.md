@@ -1,5 +1,7 @@
 # woodpecker 🪶
 
+[NOTE: scoreboard will now be updated Monday evenings, sorry for delays!]
+
 A down-to-the-metal ongoing cryptography challenge designed by [Radical Semiconductor](https://radicalsemiconductor.com/) (we're [hiring](https://www.linkedin.com/company/radical-semiconductor/jobs/)!)
 
 Send us your solutions (and resumes!) at woodpecker@radicalsemiconductor.com.
