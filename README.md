@@ -79,6 +79,9 @@ Then, clone the repository. In a terminal, `cd` into the repository and then run
 
 Woodpecker programs are text files where every line is `INV`, `INC`, `LOAD`, or `CDEC`, and usually bear a  `.wpk` file extension. 
 
+To make file sizes more manageable, repeated `INC` and `CDEC` instructions can also be represented on a single line, by appending the number of repetitions.
+For instance `INC 42` represent 42 individual `INC` instructions.
+
 To test whether a Woodpecker program passes a challenge, run 
 ```
 woodpecker solve <challenge #> <program name>
