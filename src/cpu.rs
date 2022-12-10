@@ -68,7 +68,7 @@ impl<'a> Cpu<'a> {
             addr: 0,
             store: false,
             step: 0,
-            done: false,
+            done: commands.len() == 0,
             commands,
         }
     }
@@ -78,7 +78,7 @@ impl<'a> Cpu<'a> {
         self.addr = 0;
         self.store = false;
         self.step = 0;
-        self.done = false;
+        self.done = self.commands.len() == 0;
     }
 
     pub fn step(&mut self) {
