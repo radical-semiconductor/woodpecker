@@ -1,6 +1,6 @@
 # woodpecker 🪶
 
-[NOTE: scoreboard will now be updated weekends, sorry for delays! I'll also be merging in pull requests early this week.]
+[NOTE: scoreboard will now be updated weekends, starting the weekend of 12/10/2022--sorry for delays! I'll also be merging in pull requests early this week.]
 
 A down-to-the-metal ongoing cryptography challenge designed by [Radical Semiconductor](https://radicalsemiconductor.com/) (we're [hiring](https://www.linkedin.com/company/radical-semiconductor/jobs/)!)
 
