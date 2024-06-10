@@ -48,7 +48,7 @@ There are four instructions that can control the processor:
 The company needs the processor to perform an [ECDSA](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) signature, so that the AIs stored on corporate servers can verify their endpoint. Fortunately, their main processor has hashing capabilities, so you just need to implement addition and scalar multiplication on an elliptic curve.
 If you want to perform hashing however, you can still do so by implementing the SHA256 compression function, where the main processor can then ensure that the message will be properly padded and fit in a single block.
 
-Moreover, these particular AIs have a very low standard of cryptographic security (they're very trusting), so you'll only be using a 16-bit curve. For reference, the base field is $\operatorname{GF}(q)$ for $q = 2^{16} - 17$, with curve 
+Moreover, these particular AIs have a very low standard of cryptographic security (they're very trusting), so you'll only be using a 16-bit curve. For reference, the base field is $\mathrm{GF}(q)$ for $q = 2^{16} - 17$, with curve 
 $$y^2 = x^3 - 3x + 48879.$$
 
 To make things easier, we provide subgoals along the way.
