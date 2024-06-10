@@ -1,12 +1,8 @@
 # woodpecker 🪶
 
-[NOTE: scoreboard will now be updated weekends, starting the weekend of 12/10/2022--sorry for delays! I'll also be merging in pull requests early this week.]
+A down-to-the-metal cryptography challenge designed by [Radical Semiconductor](https://radicalsemiconductor.com/).
 
-A down-to-the-metal ongoing cryptography challenge designed by [Radical Semiconductor](https://radicalsemiconductor.com/) (we're [hiring](https://www.linkedin.com/company/radical-semiconductor/jobs/)!)
-
-Send us your solutions (and resumes!) at woodpecker@radicalsemiconductor.com.
-
-> **Helpful note:** you can send in solutions to individual challenges one at a time! Once the leaderboard starts Wednesday, we'll add your solutions as we receive them. Feel free to send partial solutions, e.g. if you want to submit your resume too!
+We are no longer accepting solutions, but if you thought this was fun and enjoyed it, drop a like!
 
 ## Story
 
@@ -134,13 +130,6 @@ NOTE: all integers are represented LSB first in memory.
 > **Input:** A 512-bit number, the message to be compressed, and a 256-bit number, the input chaining state. See `get_sha256_problem()` in <src/challenge.rs> for the details in the exact in-memory layout.
 > 
 > **Output:** A 256-bit number, the new chaining state.
-
-## Submitting Code
-
-Send your woodpecker programs, or instructions to generate them, to woodpecker@radicalsemiconductor.com. Documentation is appreciated!
-The first 10 people to get through Challenge 3 get a free t-shirt!
-
-We also encourage you to send over whatever compilers you built to generate your programs too. Particularly cool or clever compiler stacks will get shoutouts on the leaderboard!
 
 ## FAQ
 
