@@ -139,11 +139,7 @@ NOTE: all integers are represented LSB first in memory.
 
 ### How do I know these challenges are possible?
 
-> We've made sure to solve all of these before release. (We promise!)
-
-### The woodpecker debugger/tester is broken, what do I do?
-
-> Message woodpecker@radicalsemiconductor.com with your issue and we'll get on it.
+> We've made sure to solve all of these before release--well, except for SHA256 (though people have solved it!).
 
 ### Should the programs I'm writing get kind of long?
 
@@ -152,11 +148,3 @@ NOTE: all integers are represented LSB first in memory.
 ### What if I want to improve the debugger/make a new challenge?
 
 > Make a pull request! We'd love your help.
-
-### Are there other challenges like this out there?
-
-> If this was hard but fun, ping us at hiring@radicalsemiconductor.com with your resume. We designed this somewhat unique problem to require the same kind of thinking our work does, so please join us!
-
-### Can I apply to join anyway if I think you're cool?
-
-> Please do--we'd love to chat! Just reach out to hiring@radicalsemiconductor.com.
